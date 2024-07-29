@@ -1,4 +1,4 @@
-#HiKVISION综合安防管理平台任意文件上传
+#HiKVISION综合安防管理平台files任意文件上传
 
 import requests,sys,argparse,re,json
 from multiprocessing.dummy import Pool
@@ -10,7 +10,7 @@ def banner():
 
 def main():
     banner()
-    parsers=argparse.ArgumentParser(description='HiKVISION综合安防管理平台任意文件上传')
+    parsers=argparse.ArgumentParser(description='HiKVISION综合安防管理平台files任意文件上传')
     parsers.add_argument('-u','--url',dest='url',type=str,help='please input your url')
     parsers.add_argument('-f','--file',dest='file',type=str,help='please input your filepath')
     args=parsers.parse_args()
